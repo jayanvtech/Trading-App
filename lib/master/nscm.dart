@@ -72,4 +72,6 @@ class NscmData {
       'close': close,
     };
   }
+
+
 }

@@ -25,7 +25,6 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       emit(LoginFailure(error: event.error));
     });
   }
-
   Future<Map<String, dynamic>> loginUser(String userID, String password) async {
     try {
       var url =

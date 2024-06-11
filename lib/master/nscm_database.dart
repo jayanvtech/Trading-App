@@ -4,7 +4,9 @@ import 'package:tradingapp/master/nscm.dart';
 class NscmDatabase {
   static final String _dbName = 'nifty_data1.db';
   static final int _dbVersion = 1;
+
   static final String _tableNiftyData = 'nifty_data';
+
   static final String colExchange = 'Exchange';
   static final String colSegment = 'Segment';
   static final String colToken = 'Token';
