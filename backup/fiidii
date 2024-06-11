@@ -1,0 +1,190 @@
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:tradingapp/Authentication/GetApiService/apiservices.dart';
+import 'dart:math';
+
+class FiiDiiScreen extends StatefulWidget {
+  const FiiDiiScreen({super.key});
+
+  @override
+  State<FiiDiiScreen> createState() => _FiiDiiScreenState();
+}
+
+class _FiiDiiScreenState extends State<FiiDiiScreen> {
+  @override
+  Widget build(BuildContext context) {
+    String? dropdownValue = 'Daily';
+    ApiService apiService = ApiService();
+    
+    return Scaffold(
+      appBar: AppBar(title: Text('Fii/Dii')),
+      body: Container(
+        padding: EdgeInsets.all(10),
+        child: Column(
+          children: [
+            Container(
+              padding: EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: Colors.grey[300]!),
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text("Fii DII Provisional Cash"),
+                      DropdownButton<String>(
+                        borderRadius: BorderRadius.circular(10),
+                        value: dropdownValue,
+                        padding: EdgeInsets.all(10),
+                        icon: const Icon(Icons.arrow_drop_down),
+                        iconSize: 24,
+                        elevation: 0,
+                        style: const TextStyle(color: Colors.black),
+                        underline: Container(
+                          height: 2,
+                          color: Colors.blue,
+                        ),
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            dropdownValue = newValue;
+                          });
+                        },
+                        items: <String>['Daily', 'Weekly', 'Monthly', 'Yearly']
+                            .map<DropdownMenuItem<String>>((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Container(child: Text(value)),
+                          );
+                        }).toList(),
+                      )
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text("Date"),
+                      Text("FII Cash"),
+                      Text("DII Cash")
+                    ],
+                  ),
+                  Container(
+                    height: 200,
+                    child:
+                        FiiDiiList(futureData: apiService.fetchFiiDiiDetails()),
+                  )
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class FiiDiiList extends StatefulWidget {
+  final Future<Map<String, dynamic>> futureData;
+
+  FiiDiiList({required this.futureData});
+
+  @override
+  _FiiDiiListState createState() => _FiiDiiListState();
+}
+
+class _FiiDiiListState extends State<FiiDiiList> {
+  int numberOfRowsToShow = 7;
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<Map<String, dynamic>>(
+      future: widget.futureData,
+      builder:
+          (BuildContext context, AsyncSnapshot<Map<String, dynamic>> snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        } else {
+          if (snapshot.hasError)
+            return Text('Error: ${snapshot.error}');
+          else {
+            var data = snapshot.data!.entries.toList();
+            data.sort(
+                (a, b) => b.key.compareTo(a.key)); // sort in descending order
+
+            int itemCount = min(numberOfRowsToShow, data.length);
+            if (numberOfRowsToShow < data.length)
+              itemCount++; // Add space for "See More" button
+
+            return ListView.builder(
+              itemCount: itemCount,
+              itemBuilder: (context, index) {
+                if (index == numberOfRowsToShow) {
+                  return Container(height: 45,
+                    child: ElevatedButton(style: ButtonStyle(shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),backgroundColor: MaterialStateProperty.all(Colors.blue),padding: MaterialStateProperty.all(EdgeInsets.all(10)),foregroundColor: MaterialStateProperty.all(Colors.white)  ),
+                      child: Text('See More'),
+                      onPressed: () {
+                        setState(() {
+                          numberOfRowsToShow = data.length;
+                        });
+                      },
+                    ),
+                  );
+                }
+
+                var date = data[index].key;
+                var fiiDifference =
+                    data[index].value['fii_buy_sell_difference'];
+                var diiDifference =
+                    data[index].value['dii_buy_sell_difference'];
+                bool isNegative = fiiDifference.toString().startsWith('-');
+                bool isNegative2 = diiDifference.toString().startsWith('-');
+                return Container(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            children: [
+                              Text(date),
+                            ],
+                          ),
+                          Column(
+                            children: [
+                              Text(
+                                fiiDifference.toStringAsFixed(2),
+                                style: TextStyle(
+                                  color: isNegative ? Colors.red : Colors.green,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Column(
+                            children: [
+                              Text(
+                                diiDifference.toStringAsFixed(2),
+                                style: TextStyle(
+                                  color:
+                                      isNegative2 ? Colors.red : Colors.green,
+                                ),
+                              ),
+                            ],
+                          )
+                        ],
+                      ),
+                    ],
+                  ),
+                );
+              },
+            );
+          }
+        }
+      },
+    );
+  }
+
+}

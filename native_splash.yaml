@@ -1,0 +1,11 @@
+native_splash:
+  android: true
+  ios: true
+  web: false
+
+  color: "#1D322F"
+  image: assets/AppIcon/AppLogo.png
+
+  android_12:
+    color: "#1D322F"
+    image: assets/AppIcon/AppLogo.png
