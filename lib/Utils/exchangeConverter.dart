@@ -17,5 +17,23 @@ class ExchangeConverter {
         return 'Unknown';
     }
   }
-  
+
+  int getExchangeSegmentNumber(String exchangeSegment) {
+    switch (exchangeSegment) {
+      case 'NSECM':
+        return 1;
+      case 'NSEFO':
+        return 2;
+      case 'NSECD':
+        return 3;
+      case 'BSECM':
+        return 11;
+      case 'BSEFO':
+        return 12;
+      case 'BSECD':
+        return 13;
+      default:
+        return 0; // Return 0 or any other number for 'Unknown'
+    }
+  }
 }

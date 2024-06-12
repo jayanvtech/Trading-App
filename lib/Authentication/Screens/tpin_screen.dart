@@ -48,8 +48,7 @@ class _ValidPasswordScreenState extends State<ValidPasswordScreen> {
             }
           });
           if (enteredPin.length == 6) {
-            var result =
-                await validatePin(enteredPin);
+            var result = await validatePin(enteredPin);
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(result['message'])),
             );
@@ -125,7 +124,7 @@ class _ValidPasswordScreenState extends State<ValidPasswordScreen> {
       }
     } catch (e) {
       print(e.toString());
-      return {'status': false, 'message': 'An error occurred'};
+      return {'status': false, 'message': 'Internal Server Error!'};
     }
   }
 

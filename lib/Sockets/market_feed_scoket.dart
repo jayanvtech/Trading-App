@@ -15,9 +15,10 @@ class MarketData {
   final List<Asks> asks;
   final String totalBuyQuantity;
   final String totalSellQuantity;
-  final String Open; 
+  final String Open;
   final String High;
-  final String Low; 
+  final String Low;
+  final String AverageTradedPrice;
 
   MarketData({
     required this.price,
@@ -30,7 +31,7 @@ class MarketData {
     required this.Open,
     required this.High,
     required this.Low,
-
+    required this.AverageTradedPrice,
   });
 
   factory MarketData.fromJson(Map<String, dynamic> json) {
@@ -45,11 +46,12 @@ class MarketData {
           json['Touchline']['PercentChange'].toStringAsFixed(2) ?? '0',
       close: json['Touchline']['Close'].toString() ?? '0',
       totalBuyQuantity: json['Touchline']['TotalBuyQuantity'].toString() ?? '0',
-      totalSellQuantity: json['Touchline']['TotalSellQuantity'].toString() ?? '0',
+      totalSellQuantity:
+          json['Touchline']['TotalSellQuantity'].toString() ?? '0',
       Open: json['Touchline']['Open'].toString() ?? '0',
       High: json['Touchline']['High'].toString() ?? '0',
       Low: json['Touchline']['Low'].toString() ?? '0',
-
+      AverageTradedPrice: json['Touchline']['AverageTradedPrice'].toString() ?? '0',
       bids: bidsList,
       asks: AsksList,
     );
@@ -134,6 +136,7 @@ class MarketFeedSocket extends ChangeNotifier {
   Map<int, MarketData> marketDataMap = {};
   Map<int, MarketData> SubscribedmarketData = {}; //// Define the property here
   Map<int, InstrumentMarketData> instrumentmarketData = {};
+
   IO.Socket get socket {
     if (_socket == null) {
       print("object");
@@ -152,7 +155,7 @@ class MarketFeedSocket extends ChangeNotifier {
     _socket = IO.io(
       url,
       IO.OptionBuilder()
-          .setTransports(['websocket']) // for Flutter or Dart VM
+          .setTransports(['websocket'])
           .setQuery({
             'token': token,
             'userID': 'A0031',
@@ -160,22 +163,21 @@ class MarketFeedSocket extends ChangeNotifier {
             'broadcastMode': 'Full',
           })
           .setPath('/apimarketdata/socket.io')
-          // .enableAutoConnect() // disable auto-connection
+          // .enableAutoConnect()
           .build(),
     );
 
     socket.onConnect((_) {
       print('Connected to MarketData ' '');
       try {
-        //      ApiService().MarketInstrumentSubscribe(1.toString(), 26000.toString());
+        // ApiService().MarketInstrumentSubscribe(1.toString(), 26000.toString());
         // ApiService().MarketInstrumentSubscribe(1.toString(), 26001.toString());
         // ApiService().MarketInstrumentSubscribe(1.toString(), 26002.toString());
         // ApiService().MarketInstrumentSubscribe(1.toString(), 26003.toString());
         // ApiService().MarketInstrumentSubscribe(1.toString(), 26004.toString());
         // ApiService().MarketInstrumentSubscribe(1.toString(), 26005.toString());
-        print("succesdded");
-      } catch (e) {}
-      ; // Dispatch MarketDataSubscribed event
+        print("succeeded");
+      } catch (e) {}; // Dispatch MarketDataSubscribed event
     });
 
     socket.on('error', (data) => print('Socket Error: $data'));

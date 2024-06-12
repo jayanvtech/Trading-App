@@ -1,8 +1,8 @@
 import 'dart:math';
-
 import 'package:tradingapp/master/nscm.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+
 Future<List<NscmData>> fetchNiftyData() async {
   // Replace with your actual API endpoint and headers
   final response = await http.post(

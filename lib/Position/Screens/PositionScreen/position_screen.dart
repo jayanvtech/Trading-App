@@ -209,26 +209,6 @@ class PositionProvider with ChangeNotifier {
     return _positions;
   }
 
-  List<Positions>? sortByCMV(bool ascending, List<Positions>? value) {
-    if(value != null){
-      value.sort((a,b){
-        if(ascending){
-          double aProfit = (a.quantity) * (double.parse(a.actualBuyAveragePrice.toString()));
-          double bProfit = (b.quantity) * (double.parse(b.actualBuyAveragePrice.toString()));
-          return aProfit.compareTo(bProfit);
-        }else{
-          double aProfit = (a.quantity) * (double.parse(a.actualBuyAveragePrice.toString()));
-          double bProfit = (b.quantity) * (double.parse(b.actualBuyAveragePrice.toString()));
-          return bProfit.compareTo(aProfit);
-        }
-      });
-      print("Positions after sorting: ${value.map((e) => e.actualBuyAveragePrice).toList()}");
-      _positions = value;
-      notifyListeners();
-    }
-    return _positions;
-  }
-
   // void sortByProfitAscending() {
   //   _positions?.sort((a, b) {
   //     double aProfit = (a.quantity ?? 0.0) * (double.parse(a.actualBuyAveragePrice.toString()));
@@ -522,6 +502,7 @@ class _TradeProviderScreenState extends State<TradeProviderScreen> {
             if (positionProvider.positions != null &&
                 positionProvider.positions!.isNotEmpty) {
               for (var position in positionProvider.positions!) {
+                print("=========================${positionProvider.positions!.length}");
                 var exchangeSegment = position.exchangeSegment;
                 var exchangeInstrumentID = position.exchangeInstrumentID;
 

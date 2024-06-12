@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:tradingapp/GetApiService/apiservices.dart';
 import 'package:tradingapp/Position/Screens/PositionScreen/position_screen.dart';
 import 'package:tradingapp/Sockets/market_feed_scoket.dart';
 import 'package:tradingapp/Position/Models/TradeOrderModel/tradeOrder_model.dart';
+import 'package:tradingapp/Utils/const.dart/app_variables.dart';
 import 'package:tradingapp/Utils/exchangeConverter.dart';
 
 class PortfolioScreen extends StatefulWidget {
@@ -22,6 +22,8 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
   double mainBalance = 0.0;
   double todaysGain = 0.0;
   bool isSorted = false;
+  dynamic marketData;
+  double? totalBenefits;
   List<Positions>? _positions;
   List<String> isAToZorZToA = [];
   List<String> isLowToHighOrHighToLow = [];
@@ -200,20 +202,26 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
                             var exchangeSegment = position.exchangeSegment;
                             var exchangeInstrumentID =
                                 position.exchangeInstrumentId;
-                            ApiService().MarketInstrumentSubscribe(
-                              ExchangeConverter()
-                                  .getExchangeSegmentNumber(exchangeSegment)
-                                  .toString(),
-                              exchangeInstrumentID.toString(),
-                            );
 
+                            if (AppVariables.isFirstTimeApiCalling < positionProvider.positions!.length) {
+                              AppVariables.isFirstTimeApiCalling++;
 
+                              print(AppVariables.isFirstTimeApiCalling);
 
+                              ApiService().MarketInstrumentSubscribe(
+                                ExchangeConverter().getExchangeSegmentNumber(exchangeSegment).toString(),
+                                exchangeInstrumentID.toString(),
+                              );
+
+                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                                setState(() {});
+                              });
+                            }
                             double investedValue = (position.quantity) *
                                 double.parse(
                                     position.buyAveragePrice.toString());
 
-                            final marketData = context
+                            marketData = context
                                 .read<MarketFeedSocket>()
                                 .getDataById(
                                     int.parse(exchangeInstrumentID.toString()));
@@ -235,7 +243,9 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
                                 0.0;
 
                             double totalBenefits = (lastTradedPriceDouble -
-                                    double.parse(position.buyAveragePrice.toString())) * (position.quantity);
+                                    double.parse(
+                                        position.buyAveragePrice.toString())) *
+                                (position.quantity);
 
                             double todaysPositionGain =
                                 (lastTradedPrice1 - previousClosePrice) *
@@ -277,14 +287,8 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
                                 var lastTradedPrice =
                                     marketData?.price.toString() ??
                                         'Loading...';
-                                double? totalBenefits;
                                 if (lastTradedPrice != 'Loading...') {
-                                  totalBenefits =
-                                      (double.parse(lastTradedPrice) -
-                                              double.parse(position
-                                                  .buyAveragePrice
-                                                  .toString())) *
-                                          (quantity);
+                                  totalBenefits = (double.parse(lastTradedPrice) - double.parse(position.buyAveragePrice.toString())) * (quantity);
                                 }
 
                                 // double todaysPositionGain = (lastTradedPrice - previousClosePrice) *
@@ -327,8 +331,7 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
                                               ),
                                               Text(
                                                 totalBenefits != null
-                                                    ? totalBenefits
-                                                        .toStringAsFixed(2)
+                                                    ? totalBenefits!.toStringAsFixed(2)
                                                     : 'Loading...',
                                                 style: TextStyle(
                                                     color: totalBenefits
@@ -452,6 +455,51 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
     );
   }
 
+  List<Positions>? sortByCMV(bool ascending, List<Positions>? value) {
+    if (value != null) {
+      value.sort((a, b) {
+        var marketDataA = context.read<MarketFeedSocket>().getDataById(int.parse(a.exchangeInstrumentId.toString()));
+        var marketDataB = context.read<MarketFeedSocket>().getDataById(int.parse(b.exchangeInstrumentId.toString()));
+
+        double priceA = double.parse(marketDataA?.price ?? "0.0");
+        double priceB = double.parse(marketDataB?.price ?? "0.0");
+
+        if (ascending) {
+          return priceA.compareTo(priceB);
+        } else {
+          return priceB.compareTo(priceA);
+        }
+      });
+      _positions = value;
+    }
+    return _positions;
+  }
+
+  List<Positions>? sortByOverallPL(bool ascending, List<Positions>? value) {
+    if (value != null) {
+      value.sort((a, b) {
+        var totalBenefitsA = getTotalBenefits(a);
+        var totalBenefitsB = getTotalBenefits(b);
+
+        if (ascending) {
+          return totalBenefitsA.compareTo(totalBenefitsB);
+        } else {
+          return totalBenefitsB.compareTo(totalBenefitsA);
+        }
+      });
+      _positions = value;
+    }
+    return _positions;
+  }
+
+  double getTotalBenefits(Positions position) {
+    var marketData = context.read<MarketFeedSocket>().getDataById(int.parse(position.exchangeInstrumentId.toString()));
+    var lastTradedPrice = double.tryParse(marketData?.price ?? '0.0') ?? 0.0;
+    var buyAveragePrice = double.tryParse(position.buyAveragePrice.toString()) ?? 0.0;
+    var totalBenefits = (lastTradedPrice - buyAveragePrice) * position.quantity;
+    return totalBenefits;
+  }
+
   void _showFilterBottomSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -520,15 +568,31 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
                 if (isLowToHighOrHighToLow.contains('LowToHigh')) {
                   setState(() {
                     isSorted = true;
-                    _positions =
-                        value.sortByCMV(true, value.positions?.toList());
+                    _positions = sortByCMV(true, value.positions?.toList());
                   });
                 }
                 if (isLowToHighOrHighToLow.contains('HighToLow')) {
                   setState(
                     () {
                       isSorted = true;
-                      _positions = value.sortByCMV(
+                      _positions = sortByCMV(
+                        false,
+                        value.positions?.toList(),
+                      );
+                    },
+                  );
+                }
+                if(overAllPLIsLowToHighOrHighToLow.contains("OverAllLowToHigh")){
+                  setState(() {
+                    isSorted = true;
+                    _positions = sortByOverallPL(true, value.positions?.toList());
+                  });
+                }
+                if (overAllPLIsLowToHighOrHighToLow.contains('OverAllHighToLow')) {
+                  setState(
+                        () {
+                      isSorted = true;
+                      _positions = sortByOverallPL(
                         false,
                         value.positions?.toList(),
                       );

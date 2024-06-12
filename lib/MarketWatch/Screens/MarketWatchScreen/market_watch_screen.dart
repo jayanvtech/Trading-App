@@ -291,8 +291,7 @@ class _WatchlistTabState extends State<WatchlistTab>
           instrument['exchange_instrument_id'] as String;
       final exchangeSegment = instrument['exchangeSegment'].toString();
 
-      ApiService().MarketInstrumentSubscribe(
-          exchangeSegment.toString(), exchangeInstrumentID.toString());
+      ApiService().MarketInstrumentSubscribe(exchangeSegment.toString(), exchangeInstrumentID.toString());
     }
   }
 

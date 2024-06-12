@@ -1,9 +1,5 @@
-import 'dart:math';
-
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:tradingapp/GetApiService/apiservices.dart';
 import 'package:tradingapp/Utils/exchangeConverter.dart';
