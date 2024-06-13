@@ -1,3 +1,4 @@
+import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
@@ -6,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tradingapp/Authentication/Login_bloc/login_bloc.dart';
 import 'package:tradingapp/Authentication/Screens/login_screen.dart';
+import 'package:tradingapp/Notification/NotificationController/NotificationController.dart';
 import 'package:tradingapp/Portfolio/Screens/PortfolioScreen/portfolio_screen.dart';
 import 'package:tradingapp/Utils/changenotifier.dart';
 import 'package:tradingapp/Position/Screens/PositionScreen/position_screen.dart';
@@ -17,6 +19,8 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+  await NotificationController.initializeLocalNotifications();
+  await NotificationController.initializeIsolateReceivePort();
   MarketFeedSocket marketFeedSocket = MarketFeedSocket();
   //await ApiService().GetNSCEMMaster();
   // marketFeedSocket.connect();
@@ -52,17 +56,22 @@ Future<bool> isUserLoggedIn() async {
 }
 
 class MyApp extends StatefulWidget {
+  static final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
   @override
   State<MyApp> createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> {
 
+  static Color mainColor = const Color(0xFF9D50DD);
+  static const String routeHome = '/', routeNotification = '/notification-page';
+
   bool? isLoginValue = false;
 
   @override
   void initState() {
     super.initState();
+    NotificationController.startListeningNotificationEvents();
     isLogin();
     init();
   }
@@ -82,6 +91,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       title: 'My App',
+      navigatorKey: MyApp.navigatorKey,
       debugShowCheckedModeBanner: false,
       home: MultiProvider(
         providers: [

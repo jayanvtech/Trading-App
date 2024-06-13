@@ -1,8 +1,11 @@
 import 'dart:async';
+import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:tradingapp/GetApiService/apiservices.dart';
+import 'package:tradingapp/MarketWatch/Screens/InstrumentDetailScreen/instrument_details_screen.dart';
+import 'package:tradingapp/MarketWatch/Screens/WishListInstrumentDetailScreen/wishlist_instrument_details_screen.dart';
 import 'package:tradingapp/Position/Screens/PositionScreen/position_screen.dart';
 import 'package:tradingapp/Sockets/market_feed_scoket.dart';
 import 'package:tradingapp/Position/Models/TradeOrderModel/tradeOrder_model.dart';
@@ -279,7 +282,7 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
                                 var quantity = position.quantity;
                                 var orderAvgLastTradedPrice =
                                     position.actualBuyAveragePrice;
-                                var exchangeSegment = position.exchangeSegment;
+                                var exchangeSegment = ExchangeConverter().getExchangeSegmentNumber(position.exchangeSegment).toString();
                                 var exchangeInstrumentID =
                                     position.exchangeInstrumentId;
                                 final marketData = marketFeedSocket.getDataById(
@@ -299,139 +302,156 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
 
                                 return Padding(
                                   padding: const EdgeInsets.all(5.0),
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      boxShadow: [
-                                        BoxShadow(
-                                            color: Colors.grey,
-                                            blurRadius: 0.5,
-                                            spreadRadius: 0.05,
-                                            offset: Offset(0, 1))
-                                      ],
-                                      color: Colors.white,
-                                      shape: BoxShape.rectangle,
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Column(
-                                        children: [
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Expanded(
-                                                child: Text(
-                                                  position.tradingSymbol,
-                                                  style: TextStyle(
-                                                      fontSize: 13,
-                                                      fontWeight:
-                                                          FontWeight.w600),
-                                                ),
+                                  child: InkWell(
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              ViewMoreInstrumentDetailScreen(
+                                                exchangeInstrumentId: exchangeInstrumentID,
+                                                exchangeSegment: exchangeSegment,
+                                                lastTradedPrice: marketData?.price ?? "0.0",
+                                                close: marketData?.close ?? "0.0",
+                                                displayName: position.tradingSymbol,
                                               ),
-                                              Text(
-                                                totalBenefits != null
-                                                    ? totalBenefits!.toStringAsFixed(2)
-                                                    : 'Loading...',
-                                                style: TextStyle(
-                                                    color: totalBenefits
-                                                            .toString()
-                                                            .startsWith('-')
-                                                        ? Colors.red
-                                                        : Colors.green),
-                                              ),
-                                            ],
-                                          ),
-                                          SizedBox(
-                                            height: 2,
-                                          ),
-                                          Row(
+                                        ),
+                                      );
+                                    },
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        boxShadow: [
+                                          BoxShadow(
+                                              color: Colors.grey,
+                                              blurRadius: 0.5,
+                                              spreadRadius: 0.05,
+                                              offset: Offset(0, 1))
+                                        ],
+                                        color: Colors.white,
+                                        shape: BoxShape.rectangle,
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Column(
+                                          children: [
+                                            Row(
                                               mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
+                                                  MainAxisAlignment.spaceBetween,
                                               children: [
-                                                Row(
-                                                  children: [
-                                                    SizedBox(
-                                                      width: 10,
-                                                    ),
-                                                    Text("DEL"),
-                                                  ],
-                                                ),
-                                                Row(
-                                                  children: [
-                                                    Text(
-                                                      marketData != null
-                                                          ? marketData.price
-                                                              .toString()
-                                                          : 'Loading...',
-                                                      style: TextStyle(
-                                                          color: marketData !=
-                                                                  null
-                                                              ? (marketData
-                                                                      .price
-                                                                      .toString()
-                                                                      .startsWith(
-                                                                          '-')
-                                                                  ? Colors.red
-                                                                  : Colors
-                                                                      .green)
-                                                              : Colors.black),
-                                                    ),
-                                                    Text(
-                                                        '(${marketData != null ? marketData.percentChange.toString() : 'Loading...'}%)'),
-                                                  ],
-                                                )
-                                              ]),
-                                          SizedBox(
-                                            height: 2,
-                                          ),
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Row(
-                                                children: [
-                                                  Text(
-                                                    // "Qty: ${positionProvider.positions![index].quantity.toString()}",
-                                                    "Qty: ${position.quantity.toString()}",
+                                                Expanded(
+                                                  child: Text(
+                                                    position.tradingSymbol,
                                                     style: TextStyle(
-                                                        fontSize: 15,
+                                                        fontSize: 13,
                                                         fontWeight:
                                                             FontWeight.w600),
                                                   ),
-                                                  SizedBox(
-                                                    width: 10,
+                                                ),
+                                                Text(
+                                                  totalBenefits != null
+                                                      ? totalBenefits!.toStringAsFixed(2)
+                                                      : 'Loading...',
+                                                  style: TextStyle(
+                                                      color: totalBenefits
+                                                              .toString()
+                                                              .startsWith('-')
+                                                          ? Colors.red
+                                                          : Colors.green),
+                                                ),
+                                              ],
+                                            ),
+                                            SizedBox(
+                                              height: 2,
+                                            ),
+                                            Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  Row(
+                                                    children: [
+                                                      SizedBox(
+                                                        width: 10,
+                                                      ),
+                                                      Text("DEL"),
+                                                    ],
                                                   ),
-                                                  // Text(positionProvider.positions![index].exchangeSegment.toString())
-                                                  Text(position.exchangeSegment
-                                                      .toString())
-                                                ],
-                                              ),
-                                              Text(
-                                                // "Avg: ${positionProvider.positions![index].buyAveragePrice.toStringAsFixed(2)}",
-                                                "Avg: ${position.buyAveragePrice.toStringAsFixed(2)}",
-                                                style: TextStyle(),
-                                              ),
-                                            ],
-                                          ),
-                                          SizedBox(
-                                            height: 2,
-                                          ),
-                                          // Display Invested Value
-                                          // Row(
-                                          //   mainAxisAlignment:
-                                          //   MainAxisAlignment.spaceBetween,
-                                          //   children: [
-                                          //     Text(
-                                          //       "Invested: ₹${investedValue.toStringAsFixed(2)}",
-                                          //       style: TextStyle(
-                                          //           fontSize: 15,
-                                          //           fontWeight: FontWeight.w600),
-                                          //     ),
-                                          //   ],
-                                          // ),
-                                        ],
+                                                  Row(
+                                                    children: [
+                                                      Text(
+                                                        marketData != null
+                                                            ? marketData.price
+                                                                .toString()
+                                                            : 'Loading...',
+                                                        style: TextStyle(
+                                                            color: marketData !=
+                                                                    null
+                                                                ? (marketData
+                                                                        .price
+                                                                        .toString()
+                                                                        .startsWith(
+                                                                            '-')
+                                                                    ? Colors.red
+                                                                    : Colors
+                                                                        .green)
+                                                                : Colors.black),
+                                                      ),
+                                                      Text(
+                                                          '(${marketData != null ? marketData.percentChange.toString() : 'Loading...'}%)'),
+                                                    ],
+                                                  )
+                                                ]),
+                                            SizedBox(
+                                              height: 2,
+                                            ),
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.spaceBetween,
+                                              children: [
+                                                Row(
+                                                  children: [
+                                                    Text(
+                                                      // "Qty: ${positionProvider.positions![index].quantity.toString()}",
+                                                      "Qty: ${position.quantity.toString()}",
+                                                      style: TextStyle(
+                                                          fontSize: 15,
+                                                          fontWeight:
+                                                              FontWeight.w600),
+                                                    ),
+                                                    SizedBox(
+                                                      width: 10,
+                                                    ),
+                                                    // Text(positionProvider.positions![index].exchangeSegment.toString())
+                                                    Text(position.exchangeSegment
+                                                        .toString())
+                                                  ],
+                                                ),
+                                                Text(
+                                                  // "Avg: ${positionProvider.positions![index].buyAveragePrice.toStringAsFixed(2)}",
+                                                  "Avg: ${position.buyAveragePrice.toStringAsFixed(2)}",
+                                                  style: TextStyle(),
+                                                ),
+                                              ],
+                                            ),
+                                            SizedBox(
+                                              height: 2,
+                                            ),
+                                            // Display Invested Value
+                                            // Row(
+                                            //   mainAxisAlignment:
+                                            //   MainAxisAlignment.spaceBetween,
+                                            //   children: [
+                                            //     Text(
+                                            //       "Invested: ₹${investedValue.toStringAsFixed(2)}",
+                                            //       style: TextStyle(
+                                            //           fontSize: 15,
+                                            //           fontWeight: FontWeight.w600),
+                                            //     ),
+                                            //   ],
+                                            // ),
+                                          ],
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -1023,213 +1043,6 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
           ],
         ),
       ],
-    );
-  }
-}
-
-class HoldingProvider with ChangeNotifier {
-  List<Holdings>? _holdingsvalues;
-
-  String searchTerm = '';
-
-  List<Holdings>? get holdingValues => _holdingsvalues;
-
-  Future<void> GetHoldings() async {
-    final apiService = ApiService();
-    final response =
-        await apiService.GetHoldings(); // Call your API function here
-    _holdingsvalues = Holdings.fromJsonList(response);
-
-    notifyListeners();
-  }
-
-  void setSearchTerm(String term) {
-    searchTerm = term;
-    notifyListeners();
-  }
-}
-
-class HoldingsPortfolioScreen extends StatefulWidget {
-  @override
-  _PHoldingsPortfolioScreenState createState() =>
-      _PHoldingsPortfolioScreenState();
-}
-
-class _PHoldingsPortfolioScreenState extends State<HoldingsPortfolioScreen> {
-  String search = '';
-  List<Holdings> filteredPositions = [];
-
-  Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => PositionProvider()..getPosition(),
-      child: Consumer<PositionProvider>(
-        builder: (context, positionProvider, child) {
-          if (positionProvider.positions == null) {
-            return Center(child: CircularProgressIndicator());
-          } else if (positionProvider.positions!.isEmpty) {
-            return Center(
-                child: Text(
-              "You have no positions. Place an order to open a new position",
-              textAlign: TextAlign.center,
-            ));
-          } else {
-            if (positionProvider.positions != null &&
-                positionProvider.positions!.isNotEmpty) {
-              for (var position in positionProvider.positions!) {
-                var exchangeSegment = position.exchangeSegment;
-                var exchangeInstrumentID = position.exchangeInstrumentId;
-                ApiService().MarketInstrumentSubscribe(
-                    ExchangeConverter()
-                        .getExchangeSegmentNumber(exchangeSegment)
-                        .toString(),
-                    exchangeInstrumentID.toString());
-              }
-            }
-            return Consumer<MarketFeedSocket>(
-                builder: (context, marketFeedSocket, child) {
-              return ListView.builder(
-                shrinkWrap: true,
-                itemCount: positionProvider.positions!.length,
-                padding:
-                    const EdgeInsets.symmetric(vertical: 8.0), // Add this line
-                itemBuilder: (context, index) {
-                  var position = positionProvider.positions![index];
-
-                  var quentity = position.quantity;
-                  var orderAvglastTradedPrice = position.actualBuyAveragePrice;
-                  var exchangeSegment = position.exchangeSegment;
-                  var exchangeInstrumentID = position.exchangeInstrumentId;
-                  final marketData = marketFeedSocket
-                      .getDataById(int.parse(exchangeInstrumentID.toString()));
-                  var lastTradedPrice =
-                      marketData?.price.toString() ?? 'Loading...';
-                  double? TotalBenifits;
-                  if (lastTradedPrice != 'Loading...') {
-                    TotalBenifits = (double.parse(lastTradedPrice) -
-                            double.parse(
-                                position.buyAveragePrice.toString() ?? '0')) *
-                        (quentity ?? 0.0);
-                  }
-                  // print(positionProvider.positions![index].exchangeInstrumentID);
-                  return Padding(
-                    padding: const EdgeInsets.all(5.0),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        boxShadow: [
-                          BoxShadow(
-                              color: Colors.grey,
-                              blurRadius: 0.5,
-                              spreadRadius: 0.05,
-                              offset: Offset(0, 1))
-                        ],
-                        color: Colors.white,
-                        shape: BoxShape.rectangle,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    positionProvider
-                                        .positions![index].tradingSymbol,
-                                    style: TextStyle(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w600),
-                                  ),
-                                ),
-                                Text(
-                                  TotalBenifits != null
-                                      ? TotalBenifits.toStringAsFixed(2)
-                                      : 'Loading...',
-                                  style: TextStyle(color: Colors.red),
-                                ),
-                              ],
-                            ),
-                            SizedBox(
-                              height: 2,
-                            ),
-                            Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Row(
-                                    children: [
-                                      // Text(
-                                      //   positionProvider
-                                      //       .positions![index].orderSide,
-                                      //   style: TextStyle(
-                                      //     color: positionProvider
-                                      //                 .positions![index]
-                                      //                 .orderSide
-                                      //                 .toString() ==
-                                      //             'BUY'
-                                      //         ? Colors.green
-                                      //         : Colors.red,
-                                      //   ),
-                                      // ),
-                                      SizedBox(
-                                        width: 10,
-                                      ),
-                                      Text("DEL"),
-                                    ],
-                                  ),
-                                  Row(
-                                    children: [
-                                      Text(
-                                        marketData != null
-                                            ? marketData.price.toString()
-                                            : 'Loading...',
-                                        style: TextStyle(color: Colors.red),
-                                      ),
-                                      Text(
-                                          '(${marketData != null ? marketData.percentChange.toString() : 'Loading...'}%)'),
-                                    ],
-                                  )
-                                ]),
-                            SizedBox(
-                              height: 2,
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Row(
-                                  children: [
-                                    Text(
-                                      "Qty: ${positionProvider.positions![index].quantity.toString()}",
-                                      style: TextStyle(
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.w600),
-                                    ),
-                                    SizedBox(
-                                      width: 10,
-                                    ),
-                                    Text(positionProvider
-                                        .positions![index].exchangeSegment
-                                        .toString())
-                                  ],
-                                ),
-                                Text(
-                                  "Avg: ${positionProvider.positions![index].buyAveragePrice.toStringAsFixed(2)}",
-                                  style: TextStyle(),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              );
-            });
-          }
-        },
-      ),
     );
   }
 }

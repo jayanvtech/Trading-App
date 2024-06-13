@@ -5,23 +5,30 @@ import 'package:tradingapp/Authentication/auth_services.dart';
 import 'package:tradingapp/Bottom_nav_bar_screen.dart';
 import 'package:tradingapp/DashBoard/Screens/FII/DII/Model/fiiHistoryDataModel.dart';
 import 'package:tradingapp/DashBoard/Screens/FII/DII/Model/stocksAndIndexDataModel.dart';
+import 'package:tradingapp/Notification/NotificationController/NotificationController.dart';
 import 'package:tradingapp/Portfolio/Screens/PortfolioScreen/portfolio_screen.dart';
 import 'package:tradingapp/Position/Screens/PositionScreen/position_screen.dart';
 import 'package:tradingapp/Profile/Models/UserProfileModel/userProfile_model.dart';
 import 'package:tradingapp/Sockets/market_feed_scoket.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
+import 'package:tradingapp/model/trade_balance_model.dart';
+
+
 class ApiService {
   final String baseUrl = "http://14.97.72.10:3000";
 
+
   Future<List<dynamic>> searchInstruments(String query) async {
     print("Search called with query: $query");
+
 
     // Return early if the search query is too short
     if (query.length < 2) {
       print("Query too short");
       return [];
     }
+
 
     // Obtain the token
     final String? apiToken = await getToken();
@@ -30,18 +37,21 @@ class ApiService {
       throw Exception('Authentication token is not available.');
     }
 
+
     try {
       final response = await http.get(
           Uri.parse(
               '$baseUrl/apimarketdata/search/instruments?searchString=$query'),
           headers: {
             'Authorization':
-                '$apiToken', // Correctly format the authorization header
+            '$apiToken', // Correctly format the authorization header
             'Content-Type': 'application/json'
           });
 
+
       // print("Response Status: ${response.statusCode}");
-       print("Response Body: ${response.body}");
+      print("Response Body: ${response.body}");
+
 
       if (response.statusCode == 200) {
         var data = json.decode(response.body);
@@ -66,12 +76,14 @@ class ApiService {
     }
   }
 
+
   Future<dynamic> GetBhavCopy(
       String exchangeInstrumentID, String exchangeSegment) async {
     final String? apiToken = await getToken();
     if (apiToken == null) {
       throw Exception('Authentication token is not available.');
     }
+
 
     try {
       var headers = {
@@ -88,6 +100,7 @@ class ApiService {
         ]
       });
 
+
       var response = await http.post(
         Uri.parse(
             'http://14.97.72.10:3000/apimarketdata/search/instrumentsbyid'),
@@ -95,10 +108,12 @@ class ApiService {
         body: body,
       );
 
+
       if (response.statusCode == 200) {
         var data = jsonDecode(response.body);
         if (data['type'] == 'success' && data['result'] != null) {
           final closeValue = data['result'][0]['Bhavcopy']['Close'];
+
 
           return closeValue.toString();
         } else {
@@ -120,6 +135,7 @@ class ApiService {
     }
   }
 
+
   Future<dynamic> MarketInstrumentSubscribe(
       String exchangeSegment, String exchangeInstrumentID) async {
     String? apiToken = await getToken();
@@ -128,11 +144,12 @@ class ApiService {
         "instruments": [
           {
             "exchangeSegment": exchangeSegment,
-            "exchangeInstrumentID": exchangeInstrumentID,
+            "exchangeInstrumentID": exchangeInstrumentID
           }
         ],
         "xtsMessageCode": 1502
       });
+
 
       final response = await http.post(
         Uri.parse('$baseUrl/apimarketdata/instruments/subscription'),
@@ -153,6 +170,7 @@ class ApiService {
       rethrow;
     }
   }
+
 
   Future<dynamic> UnsubscribeMarketInstrument(
       String exchangeSegment, String exchangeInstrumentID) async {
@@ -189,15 +207,19 @@ class ApiService {
     }
   }
 
-  Future<Map<String, dynamic>> fetchFiiDiiDetailsMonthly({String? type}) async {
-  final response = await http.get(Uri.parse('http://192.168.130.48:9010/v1/get_fii_data_cash_fo_index_stocks/?type=$type'));
 
-  if (response.statusCode == 200) {
-    return json.decode(response.body) as Map<String, dynamic>;
-  } else {
-    throw Exception('Failed to load FII/DII data');
+  Future<Map<String, dynamic>> fetchFiiDiiDetailsMonthly({String? type}) async {
+    final response = await http.get(Uri.parse(
+        'http://192.168.130.48:9010/v1/get_fii_data_cash_fo_index_stocks/?type=$type'));
+
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body) as Map<String, dynamic>;
+    } else {
+      throw Exception('Failed to load FII/DII data');
+    }
   }
-}
+
 
   Future<dynamic> GetNSCEMMaster() async {
     String? apiToken =
@@ -212,6 +234,7 @@ class ApiService {
         var data = json.decode(response.body);
         if (data['type'] == 'success' && data['data'] != null) {
           print("Datagotit");
+
 
           return data['data'];
         } else {
@@ -228,18 +251,21 @@ class ApiService {
     }
   }
 
+
   Future<dynamic> GetPosition() async {
     String? apiToken = await getToken();
     String? userId = await getUserId();
     String? clientId = await getClientId();
     try {
       final response = await http.get(
-        Uri.parse('http://14.97.72.10:3000/enterprise/portfolio/positions?dayOrNet=dayWise&clientID=$clientId&userID=$userId'),
+        Uri.parse(
+            'http://14.97.72.10:3000/enterprise/portfolio/positions?dayOrNet=dayWise&clientID=$clientId&userID=$userId'),
         headers: {
           'Authorization': '$apiToken',
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
       );
+
 
       if (response.statusCode == 200) {
         var data = json.decode(response.body);
@@ -259,6 +285,7 @@ class ApiService {
       return [];
     }
   }
+
 
   Future<dynamic> GetTrades() async {
     String? apiToken = await getToken();
@@ -313,7 +340,7 @@ class ApiService {
           return data['result'];
         } else {
           print("Data retrieval success but no results in GetOrder");
-          return [];
+          return data['result'];
         }
       } else {
         print("Data retrieval success but no results in GetOrder");
@@ -329,6 +356,7 @@ class ApiService {
     String? apiToken = await getToken();
     String? userId = await getUserId();
     String? clientId = await getClientId();
+
 
     try {
       final response = await http.get(
@@ -363,6 +391,7 @@ class ApiService {
     String? userId = await getUserId();
     String? clientId = await getClientId();
 
+
     try {
       final response = await http.get(
         Uri.parse(
@@ -372,6 +401,7 @@ class ApiService {
           'Content-Type': 'application/json'
         },
       );
+
 
       if (response.statusCode == 200) {
         var data = json.decode(response.body);
@@ -399,6 +429,7 @@ class ApiService {
       throw Exception('Authentication token is not available.');
     }
 
+
     try {
       var headers = {
         'Authorization': apiToken,
@@ -414,12 +445,14 @@ class ApiService {
         ]
       });
 
+
       var response = await http.post(
         Uri.parse(
             'http://14.97.72.10:3000/apimarketdata/search/instrumentsbyid'),
         headers: headers,
         body: body,
       );
+
 
       if (response.statusCode == 200) {
         var data = jsonDecode(response.body);
@@ -445,61 +478,64 @@ class ApiService {
     }
   }
 
-  Future<void> placeOrder(Map<String, dynamic> orderDetails) async {
-  try {print("tryis calling");
-  final String? apiToken = await getToken();
-      final response = await http.post(
-      Uri.parse('http://14.97.72.10:3000/enterprise/orders'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-        'Authorization': apiToken.toString(),
-      },
-      body: jsonEncode(orderDetails),
-    );
-    print(response.body);
-    if (response.statusCode != 200) {
-      throw Exception('Failed to place order');
-    } else {
-      Get.offAll(() => MainScreen());
-      PositionProvider().getPosition();
-      Get.snackbar('Order Placed', 'Order placed successfully');
-    }
-  }
-  catch (e) {
-    print(e);
-  }
-}
-
-  Future<UserProfile> fetchUserProfile(String token) async {
-    String? token = await getToken();
-    String? userId = await getUserId();
-    String? clientId = await getClientId();
-    if (token == null) {
-      throw Exception('User is not logged in');
-    }
-
+  Future<void> placeOrder(Map<String, dynamic> orderDetails,String? displayName) async {
     try {
-      final response = await http.get(
-        Uri.parse('http://14.97.72.10:3000/enterprise/user/profile?clientID=$clientId&userID=$userId'),
-        headers: {
-          'Authorization': token,
+      print("tryis calling");
+      final String? apiToken = await getToken();
+      final response = await http.post(
+        Uri.parse('http://14.97.72.10:3000/enterprise/orders'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': apiToken.toString(),
         },
+        body: jsonEncode(orderDetails),
       );
       print(response.body);
-      if (response.statusCode == 200) {
-        print(response.body);
-        return UserProfile.fromJson(jsonDecode(response.body));
+      if (response.statusCode != 200) {
+        throw Exception('Failed to place order');
       } else {
-        if (response.statusCode == 401) {
-          // Handle unauthorized error
-          throw Exception('Unauthorized');
+        Get.offAll(() => MainScreen());
+        PositionProvider().getPosition();
+        Get.snackbar('Order Placed', 'Order placed successfully');
+        try{
+          final response = await GetOrder();
+          Map<String, dynamic>? lastMap;
+
+          for (var i = 0; i < response.length; i++) {
+            lastMap = response[i];
+          }
+          print(lastMap);
+
+          if(lastMap?['OrderStatus'] == "Filled"){
+            NotificationController.createNewNotification(
+                title: "Order placed successfully",
+                description: "A ${orderDetails['orderQuantity']} $displayName ${orderDetails['orderSide']} Successfully"
+            );
+          }else if(lastMap?['OrderStatus'] == "Rejected"){
+            NotificationController.createNewNotification(
+                title: "Order is Rejected",
+                description: "A ${orderDetails['orderQuantity']} $displayName ${orderDetails['orderSide']} is Rejected because ${lastMap?['CancelRejectReason']}"
+            );
+          }else if(lastMap?['OrderStatus'] == "Cancelled"){
+            NotificationController.createNewNotification(
+                title: "Order is Cancelled",
+                description: "A ${orderDetails['orderQuantity']} $displayName ${orderDetails['orderSide']} is Cancelled because ${lastMap?['CancelRejectReason']}"
+            );
+          }else{
+            NotificationController.createNewNotification(
+                title: "Order is Rejected",
+                description: "A ${orderDetails['orderQuantity']} $displayName ${orderDetails['orderSide']} is Rejected because ${lastMap?['CancelRejectReason']}"
+            );
+          }
+        }catch(e){
+          NotificationController.createNewNotification(
+              title: "Order isn't placed",
+              description: "Internal Server Error!"
+          );
         }
-        throw Exception('Failed to load user profile');
       }
     } catch (e) {
-      // This will catch any exceptions thrown from the try block
-      print('Caught error: $e');
-      throw Exception('Failed to load user profile due to an error: $e');
+      print(e);
     }
   }
 
@@ -507,6 +543,7 @@ class ApiService {
     try {
       final response = await http.get(
           Uri.parse('http://14.97.72.10:3000/enterprise/common/holidaylist'));
+
 
       if (response.statusCode == 200) {
         // If the server returns a 200 OK response, parse the JSON
@@ -547,13 +584,16 @@ class ApiService {
         final successData = jsonData['success'];
         final data = successData['data'];
 
+
         data.forEach((key, value) {
           final cashFii = value['cash']['fii'];
           final cashDii = value['cash']['dii'];
           final fnoFiiquantitywise = value['future']['fii'];
-          final fnoDiiAmountwise = value['future']['fii']['amount-wise']['net_oi'];
+          final fnoDiiAmountwise =
+          value['future']['fii']['amount-wise']['net_oi'];
           final fiiBuySellDifference = cashFii['buy_sell_difference'];
           final diiBuySellDifference = cashDii['buy_sell_difference'];
+
 
           result[key] = {
             'fii_buy_sell_difference': fiiBuySellDifference,
@@ -561,6 +601,7 @@ class ApiService {
             'dii_fnoDii_amount_wise': fnoDiiAmountwise,
           };
         });
+
 
         return result;
       } else
@@ -582,6 +623,7 @@ class ApiService {
         },
       );
 
+
       if (response.statusCode == 200) {
         dynamic jsonData = jsonDecode(response.body);
         return FiiHistoryData.fromJson(jsonData['success']);
@@ -595,16 +637,155 @@ class ApiService {
   }
 
   Future<List<FiiData>> fetchStockAndIndexData({String? type}) async {
-    final String apiUrl = 'http://192.168.130.48:9010/v1/get_fii_data_cash_fo_index_stocks/?type=$type';
+    final String apiUrl =
+        'http://192.168.130.48:9010/v1/get_fii_data_cash_fo_index_stocks/?type=$type';
+
 
     final response = await http.get(Uri.parse(apiUrl));
 
+
     if (response.statusCode == 200) {
       List<dynamic> jsonResponse = json.decode(response.body)['result'];
-      List<FiiData> fiiDataList = jsonResponse.map((json) => FiiData.fromJson(json)).toList();
+      List<FiiData> fiiDataList =
+      jsonResponse.map((json) => FiiData.fromJson(json)).toList();
       return fiiDataList;
     } else {
       throw Exception('Failed to load data');
     }
   }
+
+  Future<Balance> GetBalance() async {
+    String? token = await getToken();
+    if (token == null) {
+      print(token);
+      throw Exception('User is not logged in');
+    }
+
+
+    try {
+      final response = await http.get(
+        Uri.parse(
+            'http://14.97.72.10:3000/enterprise/user/balance?clientID=A0031&userID=A0031'),
+        headers: {
+          'Authorization': token,
+        },
+      );
+      print(token);
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+        final balanceList = responseData['result']['BalanceList'];
+        final filteredBalances = Balance.filterBalances(balanceList);
+        if (filteredBalances.isEmpty) {
+          throw Exception('No balance with limitHeader "ALL|ALL|ALL" found');
+        }
+        print("3456789876545678${filteredBalances.first}");
+        return filteredBalances.first;
+      } else {
+        if (response.statusCode == 401) {
+          throw Exception('Unauthorized');
+        }
+        throw Exception('Failed to load user profile');
+      }
+    } catch (e) {
+      print('Caught error: $e');
+      throw Exception('Failed to load user profile due to an error: $e');
+    }
+  }
+
+  Future<dynamic> GetUserProfile(String clientID, String userID) async {
+    String? Token = await getToken();
+    print('Token: $Token');
+
+
+    try {
+      final response = await http.get(
+        Uri.parse(
+            'http://14.97.72.10:3000/enterprise/user/profile?clientID=A0032&userID=A0032'),
+        headers: {
+          'Authorization': Token.toString(),
+        },
+      );
+      print(response.body);
+      if (response.statusCode == 200) {
+        final jsonData = json.decode(response.body);
+        if (jsonData['type'] == 'success') {
+          return jsonData['result'];
+        } else {
+          final error = 'Error: ${jsonData['description']}';
+          return error;
+        }
+      } else {
+        return 'Error: Failed to fetch data. Status code: ${response.statusCode}';
+      }
+    } catch (error) {
+      return 'Error: $error';
+    }
+    throw Exception('Failed to get user profile');
+  }
+
+  Future<UserProfile>? fetchUserProfile() async {
+    String? token = await getToken();
+    if (token == null) {
+      throw Exception('User is not logged in');
+    }
+
+
+    try {
+      final response = await http.get(
+        Uri.parse(
+            'http://14.97.72.10:3000/enterprise/user/profile?clientID=A0031&userID=A0031'),
+        headers: {
+          'Authorization': token,
+        },
+      );
+      print(response.body);
+      if (response.statusCode == 200) {
+        print(response.body);
+        return UserProfile.fromJson(jsonDecode(response.body));
+      } else {
+        if (response.statusCode == 401) {
+          // Handle unauthorized error
+          throw Exception('Unauthorized');
+        }
+        throw Exception('Failed to load user profile');
+      }
+    } catch (e) {
+      // This will catch any exceptions thrown from the try block
+      print('Caught error: $e');
+      throw Exception('Failed to load user profile due to an error: $e');
+    }
+  }
+
+  Future<UserProfile?> fetchDUserProfile(String clientID, String userID) async {
+    final String apiUrl =
+        'http://14.97.72.10:3000/enterprise/user/profile?clientID=$clientID&userID=$userID';
+
+
+    try {
+      final response = await http.get(Uri.parse(apiUrl));
+
+
+      if (response.statusCode == 200) {
+        // Parse the JSON data
+        final jsonData = json.decode(response.body);
+        if (jsonData['type'] == 'success') {
+          // Convert JSON data to UserProfile object
+          return UserProfile.fromJson(jsonData);
+        } else {
+          print('Error: ${jsonData['description']}');
+          return null;
+        }
+      } else {
+        print(
+            'Error: Failed to fetch data. Status code: ${response.statusCode}');
+        return null;
+      }
+    } catch (error) {
+      print('Error: $error');
+      return null;
+    }
+  }
 }
+
+
+

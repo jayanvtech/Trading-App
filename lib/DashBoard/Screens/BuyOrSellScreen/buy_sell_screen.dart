@@ -1,5 +1,10 @@
+import 'dart:math';
+
+import 'package:awesome_notifications/awesome_notifications.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:tradingapp/GetApiService/apiservices.dart';
 import 'package:tradingapp/Utils/exchangeConverter.dart';
@@ -14,12 +19,12 @@ class BuySellScreen extends StatefulWidget {
   final bool isBuy;
   BuySellScreen(
       {Key? key,
-      required this.exchangeInstrumentId,
-      required this.exchangeSegment,
-      required this.lastTradedPrice,
-      required this.close,
-      required this.displayName,
-      required this.isBuy})
+        required this.exchangeInstrumentId,
+        required this.exchangeSegment,
+        required this.lastTradedPrice,
+        required this.close,
+        required this.displayName,
+        required this.isBuy})
       : super(key: key);
 
   @override
@@ -49,7 +54,7 @@ class _BuySellScreenState extends State<BuySellScreen> {
       appBar: AppBar(
         title: Consumer<MarketFeedSocket>(builder: (context, data, child) {
           final marketData =
-              data.getDataById(int.parse(widget.exchangeInstrumentId));
+          data.getDataById(int.parse(widget.exchangeInstrumentId));
 
           final priceChange = marketData != null
               ? double.parse(marketData.price) - double.parse(widget.close)
@@ -99,7 +104,7 @@ class _BuySellScreenState extends State<BuySellScreen> {
         padding: EdgeInsets.all(15),
         child: Consumer<MarketFeedSocket>(builder: (context, data, child) {
           final marketData =
-              data.getDataById(int.parse(widget.exchangeInstrumentId));
+          data.getDataById(int.parse(widget.exchangeInstrumentId));
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -121,7 +126,7 @@ class _BuySellScreenState extends State<BuySellScreen> {
                               ? Colors.blue
                               : Colors.grey,
                           disabledForegroundColor:
-                              Colors.grey.withOpacity(0.38),
+                          Colors.grey.withOpacity(0.38),
                         ),
                         onPressed: () {
                           setState(() {
@@ -144,7 +149,7 @@ class _BuySellScreenState extends State<BuySellScreen> {
                               ? Colors.blue
                               : Colors.grey,
                           disabledForegroundColor:
-                              Colors.grey.withOpacity(0.38),
+                          Colors.grey.withOpacity(0.38),
                         ),
                         onPressed: () {
                           setState(() {
@@ -167,7 +172,7 @@ class _BuySellScreenState extends State<BuySellScreen> {
                               ? Colors.blue
                               : Colors.grey,
                           disabledForegroundColor:
-                              Colors.grey.withOpacity(0.38),
+                          Colors.grey.withOpacity(0.38),
                         ),
                         onPressed: () {
                           setState(() {
@@ -209,15 +214,15 @@ class _BuySellScreenState extends State<BuySellScreen> {
                                 icon: Icon(Icons.remove, color: Colors.white),
                                 onPressed: _selectedOption == 'Limit'
                                     ? () {
-                                        double currentValue =
-                                            double.tryParse(_controller.text) ??
-                                                0;
-                                        currentValue -=
-                                            1; // Decrease the value by 1
-                                        _controller.text =
-                                            currentValue.toStringAsFixed(
-                                                2); // Update the controller
-                                      }
+                                  double currentValue =
+                                      double.tryParse(_controller.text) ??
+                                          0;
+                                  currentValue -=
+                                  1; // Decrease the value by 1
+                                  _controller.text =
+                                      currentValue.toStringAsFixed(
+                                          2); // Update the controller
+                                }
                                     : null, // Disable the button when "Market" is selected
                               ),
                             ),
@@ -254,15 +259,15 @@ class _BuySellScreenState extends State<BuySellScreen> {
                                 ),
                                 onPressed: _selectedOption == 'Limit'
                                     ? () {
-                                        double currentValue =
-                                            double.tryParse(_controller.text) ??
-                                                0;
-                                        currentValue +=
-                                            1; // Increase the value by 1
-                                        _controller.text =
-                                            currentValue.toStringAsFixed(
-                                                2); // Update the controller
-                                      }
+                                  double currentValue =
+                                      double.tryParse(_controller.text) ??
+                                          0;
+                                  currentValue +=
+                                  1; // Increase the value by 1
+                                  _controller.text =
+                                      currentValue.toStringAsFixed(
+                                          2); // Update the controller
+                                }
                                     : null, // Disable the button when "Market" is selected
                               ),
                             ),
@@ -283,7 +288,7 @@ class _BuySellScreenState extends State<BuySellScreen> {
                                     ? Colors.blue
                                     : Colors.grey,
                                 disabledForegroundColor:
-                                    Colors.grey.withOpacity(0.38),
+                                Colors.grey.withOpacity(0.38),
                               ),
                               onPressed: () {
                                 setState(() {
@@ -306,7 +311,7 @@ class _BuySellScreenState extends State<BuySellScreen> {
                                     ? Colors.blue
                                     : Colors.grey,
                                 disabledForegroundColor:
-                                    Colors.grey.withOpacity(0.38),
+                                Colors.grey.withOpacity(0.38),
                               ),
                               onPressed: () {
                                 setState(() {
@@ -350,15 +355,15 @@ class _BuySellScreenState extends State<BuySellScreen> {
                           "clientID": "A0031",
                           "exchangeSegment": ExchangeConverter()
                               .getExchangeSegmentName(
-                                  int.parse(widget.exchangeSegment))
+                              int.parse(widget.exchangeSegment))
                               .toString(),
                           "exchangeInstrumentID":
-                              widget.exchangeInstrumentId.toString(),
+                          widget.exchangeInstrumentId.toString(),
                           "productType": "NRML",
                           "orderType":
-                              _controller.text == widget.lastTradedPrice
-                                  ? "MARKET"
-                                  : "LIMIT",
+                          _controller.text == widget.lastTradedPrice
+                              ? "MARKET"
+                              : "LIMIT",
                           "orderSide": widget.isBuy ? "BUY" : "SELL",
                           "timeInForce": "DAY",
                           "disclosedQuantity": 0,
@@ -367,28 +372,28 @@ class _BuySellScreenState extends State<BuySellScreen> {
                           "stopPrice": 0,
                           "userID": "A0031"
                         };
-                        ApiService().placeOrder(orderDetails);
+                        ApiService().placeOrder(orderDetails,widget.displayName);
                       },
                       child: Text("Place Buy Order"),
                       style: ButtonStyle(
                         backgroundColor:
-                            MaterialStateProperty.all<Color>(Colors.blue),
+                        MaterialStateProperty.all<Color>(Colors.blue),
                         foregroundColor: MaterialStateColor.resolveWith(
-                            (states) => Colors.white),
+                                (states) => Colors.white),
                         shape:
-                            MaterialStateProperty.all<RoundedRectangleBorder>(
-                                RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10))),
+                        MaterialStateProperty.all<RoundedRectangleBorder>(
+                            RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10))),
                       ),
                     ),
                   ),
                   _selectedProductType == 'MIS'
                       ? Container(
-                          child: Text(marketData!.percentChange.toString()),
-                        ) // Display this when 'mis' is selected
+                    child: Text(marketData!.percentChange.toString()),
+                  ) // Display this when 'mis' is selected
                       : SizedBox(
-                          height: 20,
-                        ),
+                    height: 20,
+                  ),
                 ],
               ),
             ],

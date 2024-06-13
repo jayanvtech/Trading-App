@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
 import 'package:persistent_bottom_nav_bar_v2/persistent_bottom_nav_bar_v2.dart';
+import 'package:tradingapp/DashBoard/Screens/DashBoardScreen/dashboard_screen.dart';
 import 'package:tradingapp/GetApiService/apiservices.dart';
-
-import 'package:tradingapp/Screens/Mainscreens/Dashboard/dashboard_screen.dart';
-// Assuming this is for the Market tab
-import 'package:tradingapp/Screens/Mainscreens/market_watch_screen.dart';
-import 'package:tradingapp/Screens/Mainscreens/portfolio_screen.dart';
-import 'package:tradingapp/Screens/Mainscreens/position_screen.dart';
-import 'package:tradingapp/Screens/Mainscreens/profilepage_screen.dart';
+import 'package:tradingapp/MarketWatch/Screens/MarketWatchScreen/market_watch_screen.dart';
+import 'package:tradingapp/Portfolio/Screens/PortfolioScreen/portfolio_screen.dart';
+import 'package:tradingapp/Position/Screens/PositionScreen/position_screen.dart';
+import 'package:tradingapp/Profile/Screens/ProfileScreen/profilepage_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});

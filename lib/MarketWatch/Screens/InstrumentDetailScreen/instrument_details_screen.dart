@@ -29,7 +29,6 @@ class _InstrumentDetailsScreenState extends State<InstrumentDetailsScreen> {
             decoration: BoxDecoration(color: Colors.grey[200]!),
             child: Column(
               children: [
-                
                 Container(
                     padding: EdgeInsets.all(10),
                     decoration: BoxDecoration(

@@ -738,8 +738,7 @@ class _OrderProviderScreenState extends State<OrderProviderScreen> {
                                 Row(
                                   children: [
                                     Text(
-                                      OrderProvider
-                                          .ordervalues![index].orderStatus,
+                                      OrderProvider.ordervalues![index].orderStatus,
                                       style: TextStyle(color: Colors.red),
                                     ),
                                     SizedBox(
